@@ -1,37 +1,132 @@
-## Welcome to GitHub Pages
+# For The Newbies: A simple PHP Contact Form Using Ajax To Send Email
 
-You can use the [editor on GitHub](https://github.com/holla22/For-The-Newbies-A-simple-PHP-Contact-Form-Using-Ajax-To-Send-Email/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+## This is an old tutorial I've written back in 2012 and not on my website anymore. Saving it here because a lot of people found it useful.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/z33man"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+  
+I’ve decided that I will write something for the newbie’s to PHP and show you how to create a simple contact form using AJAX to send an email to your email address.
 
-### Markdown
+I remember my first time starting out and learning PHP, damn was it hard to understand the first time. When you practice and write code often you will come to grips with it and as you go along you will get better at it.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+So let’s get started with writing code. We are going to write the PHP code that handles the sending of emails first. Yes I know I’m doing it in the reverse order as we are only going to use three fields in our form, the name, email and message field.
 
-```markdown
-Syntax highlighted code block
+**The PHP code to handle the form details and sending of the email**
 
-# Header 1
-## Header 2
-### Header 3
+    // Here we get all the information from the fields sent over by the form.
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $message = $_POST['message'];
 
-- Bulleted
-- List
+    $to = 'youremail@domain.com';
+    $subject = 'the subject';
+    $message = 'FROM: '.$name.' Email: '.$email.'Message: '.$message;
+    $headers = 'From: youremail@domain.com';
 
-1. Numbered
-2. List
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) { // this line checks that we have a valid email address
+        mail($to, $subject, $message) or die('Error sending Mail'); //This method sends the mail.
+        echo "Your email was sent!"; // success message
+    }
 
-**Bold** and _Italic_ and `Code` text
+The code above gets the field values posted using the $_POST  variable via the form we will be creating. We then set the variables to hold the TO, SUBJECT, MESSAGE and mail HEADERS information. We also do a small email validation via the PHP filter_var () method. Then we sent the message via the mail() method.
 
-[Link](url) and ![Image](src)
-```
+**Next Create the Contact Form to send a message.**
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+    <form id="mycontactform" action="" method="post"><label for="name">Name:</label>;
 
-### Jekyll Themes
+        <input id="name" type="text" name="name" />
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/holla22/For-The-Newbies-A-simple-PHP-Contact-Form-Using-Ajax-To-Send-Email/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+        <label for="email">Email:</label>
 
-### Support or Contact
+        <input id="email" type="text" name="email" />
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+        <label for="message">Message:</label>
+
+        <textarea id="message" name="message"></textarea>
+
+        <input id="submit" type="button" value="send" />
+        <div id="success" style="color: red;"></div>
+    </form>
+    
+As you can see by the code above we created a very simple form to send a message with, nothing big about it at all.
+
+**Next we create the jQuery Ajax code to post the form details to our PHP code**
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script><script type="text/javascript">
+        $(document).ready(function(){
+
+            $('#submit').click(function(){
+
+                $.post("send.php", $("#mycontactform").serialize(),&nbsp; function(data) {&nbsp;&nbsp; });
+
+                $('#success').html('Message sent!');
+                $('#success').hide(2000);
+
+            });
+
+        });
+    </script>
+    
+Here we call the jQuery code directly from the jQuery code library. Then write code to run when the page is done loading.
+
+We use an onclick event which sends the form data to our send.php file which contains our PHP code to handle the email sending. We then set a success message and hide it again.
+
+**Update 03 Dec 2012**
+
+I've made some changes to the code as requested.
+
+The response of the jQuery is now working and you will get a notice if you insert the incorrect email. Here is the html and jquery
+
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script>
+$(document).ready(function(){
+ 
+$('#submit').click(function(){
+ 
+$.post("send.php", $("#mycontactform").serialize(),&nbsp; function(response) {
+$('#success').html(response);
+//$('#success').hide('slow');
+});
+return false;
+ 
+});
+ 
+});
+</script>
+</head>
+<body>
+ 
+<form action="" method="post" id="mycontactform" >
+<label for="name">Name:</label><br />
+<input type="text" name="name" id="name" /><br />
+<label for="email">Email:</label><br />
+<input type="text" name="email" id="email" /><br />
+<label for="message">Message:</label><br />
+<textarea name="message" id="message"></textarea><br />
+<input type="button" value="send" id="submit" /><div id="success" style="color:red;"></div>
+</form>
+</body>
+</html>
+
+**Here is the new PHP code.**
+
+    // Here we get all the information from the fields sent over by the form.
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $message = $_POST['message'];
+
+    $to = 'youremail@domain.com';
+    $subject = 'the subject';
+    $message = 'FROM: '.$name.' Email: '.$email.'Message: '.$message;
+    $headers = 'From: youremail@domain.com' . "\r\n";
+
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) { // this line checks that we have a valid email address
+        mail($to, $subject, $message, $headers); //This method sends the mail.
+        echo "Your email was sent!"; // success message
+    }else{
+        echo "Invalid Email, please provide an correct email.";
+    }
+    
+If you’ve liked this tutorial or if you have some questions let me know in the comments section below. Please like the article?
